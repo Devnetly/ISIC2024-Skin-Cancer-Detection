@@ -10,8 +10,8 @@
 
     "model" : "vit_tiny_r_s16_p8_224",
 
-    "pos_weight" : 120.0,
-    "num_samples_ratio" : 1.0,
+    "pos_weight" : 125.0,
+    "num_samples_ratio" : 0.2,
 
     "num_workers" : 4,
     "prefetch_factor" : 2,
