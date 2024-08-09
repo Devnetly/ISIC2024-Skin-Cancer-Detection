@@ -24,7 +24,8 @@ class Trainer:
         checkpoints_folder : Optional[str] = None,
         start_epoch: Optional[int] = 0,
         save_best: Optional[bool] = False,
-        save_every: Optional[int] = None
+        save_every: Optional[int] = None,
+        evaluate_train: Optional[bool] = False
     ) -> None:
         
         self.model = model
@@ -40,6 +41,7 @@ class Trainer:
         self.save_best = save_best
         self.save_every = save_every
         self.epochs = 0
+        self.evaluate_train = evaluate_train
 
         if checkpoints_folder is not None:
             self.set_checkpoints_folder(checkpoints_folder)
@@ -100,6 +102,10 @@ class Trainer:
     
     def set_save_every(self, save_every: int) -> Self:
         self.save_every = save_every
+        return self
+    
+    def set_evaluate_train(self, evaluate_train: bool) -> Self:
+        self.evaluate_train = evaluate_train
         return self
     
     def _check(self) -> None:

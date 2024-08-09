@@ -4,24 +4,21 @@ import cv2
 import random
 from PIL import Image
 from typing import Callable
+from albumentations.core.transforms_interface import ImageOnlyTransform
 
-class ReinhardAugmentation(Callable):
+class ReinhardAugmentation(ImageOnlyTransform):
 
     def __init__(self, 
         stats : str,
         p: float = 0.5,
     ):
+        
+        super(ReinhardAugmentation, self).__init__(p=p)
+
         self.stats = pd.read_csv(stats)
         self.p = p
 
-    def __call__(self, img: Image.Image) -> Image.Image:
-
-        ### Check if the augmentation should be applied
-        if random.random() > self.p:
-            return img
-        
-        ### Convert the image to a numpy array
-        img = np.array(img)
+    def apply(self, img : np.ndarray, **paramse) -> Image.Image:
 
         ### Convert the image to the LAB colorspace
         img = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
@@ -50,9 +47,6 @@ class ReinhardAugmentation(Callable):
         ### Convert the image back to the RGB colorspace
         img = img.astype(np.uint8)
         img = cv2.cvtColor(img, cv2.COLOR_LAB2RGB)
-
-        ### Convert the image to a PIL Image
-        img = Image.fromarray(img)
 
         ### Return the image
         return img

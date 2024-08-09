@@ -1,0 +1,33 @@
+{
+
+    "seed" : 42,
+
+    "batch_size" : 32,
+    "learning_rate" : 0.0004,
+    "epochs" : 3,
+    "dropout" : 0.0,
+    "weight_decay" : 0.0,
+
+    "model" : "vit_tiny_r_s16_p8_224",
+
+    "pos_weight" : 200.0,
+    "num_samples_ratio" : 1.0,
+
+    "num_workers" : 4,
+    "prefetch_factor" : 2,
+
+    "external_data" : false,
+
+    "loss" : "bce",
+    "gamma" : 2.0,
+    "alpha" : 0.25,
+
+    "img_size" : [224, 224],
+    "reinhard_augmentation" : true,
+    "random_noise" : true,
+    "color_space" : "rgb",
+    "color_jitter" : false,
+
+    "patience" : 5
+
+}

@@ -1,4 +1,4 @@
-data/*
+data/*/*
 **/**/__pycache__
 expirements/**/checkpoints
 notebooks/test.ipynb

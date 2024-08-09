@@ -43,26 +43,22 @@ class MetadataBlock(nn.Module):
     def __init__(self,
         input_dim : int,
         output_dim : int,
-        dropout_rate : float = 0.4
     ) -> None:
         
         super().__init__()
 
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.dropout_rate = dropout_rate
 
         self.linear = nn.Linear(input_dim,output_dim)
         self.bn = nn.BatchNorm1d(output_dim)
         self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(dropout_rate) if dropout_rate > 0 else nn.Identity()
 
     def forward(self, x : Tensor) -> Tensor:
 
         x = self.linear(x)
         x = self.bn(x)
         x = self.relu(x)
-        x = self.dropout(x)
 
         return x
     
@@ -103,9 +99,13 @@ class MetadataNet(nn.Module):
         self.cat_net = CatMetadataNet(cat_metadata_config)
         
         self.num_net = nn.Sequential(*[
-            MetadataBlock(input_dim=self.num_cols_count,output_dim=hidden_dim,dropout_rate=dropout_rate) for _ in range(num_layers)
+            MetadataBlock(
+                input_dim=(self.num_cols_count + self.cat_net.output_dim if i == 0 else hidden_dim),
+                output_dim=hidden_dim,
+            ) for i in range(num_layers)
         ])
 
+        self.dropout = nn.Dropout(dropout_rate) if dropout_rate > 0 else nn.Identity()
         self.fc = nn.Linear(hidden_dim,num_classes)
         
     def forward(self, x : tuple[Tensor,dict[str,Tensor]]) -> Tensor:
@@ -123,6 +123,7 @@ class MetadataNet(nn.Module):
         tensor = self.num_net(tensor)
 
         ### Make the final prediction
+        tensor = self.dropout(tensor)
         tensor = self.fc(tensor)
 
         if self.num_classes == 1:

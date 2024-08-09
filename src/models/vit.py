@@ -1,49 +1,39 @@
-import torch
 import timm
-from torch import nn,Tensor
+from torch import nn
+from .base import BaseModule
 
-class ViT(nn.Module):
+class ViT(BaseModule):
 
-    __models__ = timm.list_models(filter='vit*')
+    __models__ = {
+        'vit_tiny_patch16_224': timm.models.vision_transformer.vit_tiny_patch16_224,
+        'vit_small_patch8_224' : timm.models.vision_transformer.vit_small_patch8_224,
+        'vit_tiny_r_s16_p8_224' : timm.models.vision_transformer_hybrid.vit_tiny_r_s16_p8_224,
+    }
+
+    __dims__ = {
+        'vit_tiny_patch16_224' : 192,
+        'vit_small_patch8_224' : 384,
+        'vit_tiny_r_s16_p8_224' : 192,
+    }
 
     def __init__(
         self,
-        name: str,
+        model_name: str,
+        dropout: float = 0.0,
         num_classes: int = 1,
+        pretrained: bool = True
     ):
         
-        super().__init__()
-        
-        self.num_classes = num_classes
-        self.name = name
+        super(ViT, self).__init__(model_name=model_name, num_classes=num_classes,pretrained=pretrained,dropout=dropout)
 
-        self.model = timm.create_model(
-            model_name=name,
-            num_classes=1,
-            in_chans=3,
-            pretrained=True
-        )
-
-    def forward(self, x: Tensor) -> Tensor:
-        
-        x = self.model(x)
-
-        if self.num_classes == 1:
-            x = torch.squeeze(x, dim=-1)
-
-        return x
+    def create_model(self) -> nn.Module:
+        model_fn = self.__models__[self.model_name]
+        model = model_fn(pretrained=self.pretrained,num_classes=self.num_classes)
+        return model
     
-    def predict(self, x: Tensor) -> Tensor:
-        
-        x = self.forward(x)
-        
-        if self.num_classes == 1:
-            x = torch.sigmoid(x)
-        else:
-            x = torch.softmax(x, dim=-1)
-        
-        return x
+    def get_dim(self) -> int:
+        return self.__dims__[self.model_name]
     
-    def as_backbone(self) -> nn.Module:
-        self.model.head = nn.Identity()
+    def replace_classifier(self, classifier: nn.Module) -> 'ViT':
+        self.model.head = classifier
         return self

@@ -1,6 +1,7 @@
 from typing import Any, Callable, Optional
 from torch.utils.data import Dataset
 from PIL import Image
+import numpy as np
 import pandas as pd
 import h5py
 import io
@@ -28,8 +29,7 @@ class ISICDataset(Dataset):
         metadata_transform : Optional[Callable] = None,
         target_transform : Optional[Callable] = None,
         return_metadata : bool = False,
-        split : Optional[str] = None,
-        fold : Optional[int] = None,
+        target_col : str = "target",
         mode : str = "train"
     ) -> None:
         
@@ -41,19 +41,10 @@ class ISICDataset(Dataset):
         self.target_transform = target_transform
         self.metadata_transform = metadata_transform
         self.mode = mode
-        self.fold = fold
+        self.target_col = target_col
         
         self.metadata = pd.read_csv(self.metadata_file) if isinstance(self.metadata_file, str) else self.metadata_file
         self.return_metadata = return_metadata
-
-        if split is not None:
-            if fold is None:
-                self.metadata = self.metadata[self.metadata['split'] == split]
-            else:
-                if split == "train":
-                    self.metadata = self.metadata[(self.metadata['split'] == "train") & (self.metadata['fold'] != fold)]
-                else:
-                    self.metadata = self.metadata[(self.metadata['split'] == "train") & (self.metadata['fold'] == fold)]
         
         self.hdf5 = h5py.File(self.hdf5_file, "r") if isinstance(self.hdf5_file, str) else self.hdf5_file
 
@@ -69,7 +60,7 @@ class ISICDataset(Dataset):
         row = self.metadata.iloc[index]
         
         ### Get the target
-        target = row['target'] if self.mode != "test" else 0.0
+        target = row[self.target_col] if self.mode != "test" else 0.0
         
         ### The image
         image_name = row['isic_id']
@@ -77,6 +68,7 @@ class ISICDataset(Dataset):
         buffer = dataset[()]
         image_file = io.BytesIO(buffer)
         img = Image.open(image_file)
+        img = np.array(img)
 
         ### The metadata
         metadata = row[ISICDataset.__cols__]
@@ -86,7 +78,7 @@ class ISICDataset(Dataset):
             target = self.target_transform(target)
         
         if self.img_transform is not None:
-            img = self.img_transform(img)
+            img = self.img_transform(image=img)
             
         if self.metadata_transform is not None and self.return_metadata:
             metadata = self.metadata_transform(metadata)

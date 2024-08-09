@@ -2,6 +2,7 @@ import os
 import pandas as pd
 from torch.utils.data import Dataset
 from PIL import Image
+import numpy as np
 from typing import Optional,Callable
 
 class ImagesDirectory(Dataset):
@@ -44,9 +45,10 @@ class ImagesDirectory(Dataset):
         label = row[self.target_col]
     
         image = Image.open(image_path).convert('RGB')
+        image = np.array(image)
 
         if self.img_transform is not None:
-            image = self.img_transform(image)
+            image = self.img_transform(image=image)
 
         if self.target_transform is not None:
             label = self.target_transform(label)

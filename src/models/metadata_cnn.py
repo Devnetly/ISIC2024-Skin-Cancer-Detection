@@ -7,19 +7,19 @@ class MetadataCNN(nn.Module):
     def __init__(self,
         metadata_net : MetadataNet,
         backbone : nn.Module,
-        backbone_dim : int,
         num_classes : int = 1
     ) -> None:
         
         super().__init__()
 
-        self.backbone_dim = backbone_dim
+        self.num_classes = num_classes
+        self.backbone_dim = backbone.get_dim()
 
         self.metadata_net = metadata_net
         self.backbone = backbone   
 
         self.fc = nn.Linear(
-            in_features=backbone_dim + metadata_net.hidden_dim,
+            in_features=backbone.get_dim() + metadata_net.hidden_dim,
             out_features=num_classes
         )
 
@@ -59,3 +59,5 @@ class MetadataCNN(nn.Module):
     def as_backbone(self) -> nn.Module:
         self.fc = nn.Identity()
         return self
+    
+    

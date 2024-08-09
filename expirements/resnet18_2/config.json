@@ -1,0 +1,21 @@
+{
+    "seed": 42,
+    "batch_size": 32,
+    "learning_rate": 0.0001,
+    "epochs": 5,
+    "dropout": 0.0,
+    "model": "resnet18",
+    "pos_weight": 200.0,
+    "num_samples_ratio": 1.0,
+    "patience": 2,
+    "num_workers": 4,
+    "prefetch_factor": 2,
+    "external_data": false,
+    "loss": "bce",
+    "img_size": [132, 132],
+    "reinhard_augmentation": false,
+    "random_noise": true,
+    "color_space": "rgb",
+    "mixup_cutmix": false,
+    "others" : false
+}  
