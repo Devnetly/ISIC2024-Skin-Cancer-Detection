@@ -1,4 +1,5 @@
 data/*/*
 **/**/__pycache__
 expirements/**/checkpoints
+expirements/**/*.csv
 notebooks/test.ipynb
