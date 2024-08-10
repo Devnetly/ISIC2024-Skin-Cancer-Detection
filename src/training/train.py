@@ -18,12 +18,13 @@ from pandas.errors import DtypeWarning
 from definitions import *
 from src.utils import seed_everything,score,load
 from src.datasets import ISICDataset,ImagesDirectory
-from src.models import ResNet,ViT,EfficientNet,MobileNet,Deit
+from src.models import ResNet,ViT,EfficientNet,Deit
 from src.preprocessing import ReinhardAugmentation,RGBToHSV,RGBToLAB
 from sklearn.metrics import roc_auc_score,f1_score,accuracy_score
 from src.loss import FocalLoss
 import albumentations as A
 import albumentations.pytorch as AP
+from sklearn.model_selection import StratifiedGroupKFold
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=DtypeWarning)
 logging.basicConfig(level=logging.INFO)
@@ -150,7 +151,10 @@ def create_datasets(config: Config) :
     hdf5_file = h5py.File(os.path.join(ISIS_2024_DIR, 'images.hdf5'))
     metadata_file = pd.read_csv(os.path.join(ISIS_2024_DIR, 'metadata.csv'))
 
-    splits = joblib.load(os.path.join(DATA_DIR, 'splits.pkl'))
+    # splits = joblib.load(os.path.join(DATA_DIR, 'splits.pkl'))
+
+    sgkf = StratifiedGroupKFold(n_splits=5,shuffle=True,random_state=config.seed)
+    splits = sgkf.split(metadata_file, y=metadata_file['target'], groups=metadata_file['patient_id'])
 
     for fold, (train_idx, val_idx) in enumerate(splits):
 
@@ -302,15 +306,6 @@ def create_model(config : Config) -> nn.Module:
             dropout=config.dropout
         )
         
-    elif config.model.startswith('mobilenet'):
-            
-        model = MobileNet(
-            model_name=config.model,
-            num_classes=1,
-            pretrained=True,
-            dropout=config.dropout
-        )
-
     elif config.model.startswith('deit'):
             
         model = Deit(
