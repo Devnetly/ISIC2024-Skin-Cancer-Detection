@@ -4,3 +4,8 @@ from .metadata_net import MetadataNet
 from .metadata_cnn import MetadataCNN
 from .diet import Deit
 from .efficientnet import EfficientNet
+from .swin import SwinTransformer
+from .conv_next import ConvNext
+from .eva02 import Eva02
+from .coat import Coat
+from .next_vit import NextViT

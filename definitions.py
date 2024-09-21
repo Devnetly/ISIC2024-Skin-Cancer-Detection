@@ -13,3 +13,5 @@ SEGMENTED_ISIC_2024_DIR = os.path.join(DATA_DIR, 'segmented_isic_2024')
 
 EXTERNAL_DATA_DIR = os.path.join(DATA_DIR, 'ISIC-images-mal_cropped')
 PREDICTIONS_DIR = os.path.join(DATA_DIR, 'predictions')
+
+WEIGHTS_DIR = os.path.join(ROOT_DIR, 'weights')

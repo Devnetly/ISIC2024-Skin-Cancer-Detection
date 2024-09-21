@@ -3,3 +3,4 @@ data/*/*
 expirements/**/checkpoints
 expirements/**/*.csv
 notebooks/test.ipynb
+weights/*

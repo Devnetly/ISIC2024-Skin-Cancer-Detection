@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 import h5py
 import time
-import joblib
 sys.path.append('../..')
 from argparse import ArgumentParser
 from torch import nn,optim
@@ -18,7 +17,7 @@ from pandas.errors import DtypeWarning
 from definitions import *
 from src.utils import seed_everything,score,load
 from src.datasets import ISICDataset,ImagesDirectory
-from src.models import ResNet,ViT,EfficientNet,Deit
+from src.models import ResNet,ViT,EfficientNet,Deit,SwinTransformer,ConvNext,Eva02,Coat,NextViT
 from src.preprocessing import ReinhardAugmentation,RGBToHSV,RGBToLAB
 from sklearn.metrics import roc_auc_score,f1_score,accuracy_score
 from src.loss import FocalLoss
@@ -54,7 +53,7 @@ class Config:
 
     ### Sampling
     pos_weight : float | str = "balanced" ### balanced or float
-    num_samples_ratio : float = 1.0 ### Ratio of samples to use
+    num_samples_ratio : float | str = 1.0 ### Ratio of samples to use
     sampling_type : str = 'dynamic' ### Dynamic ==> new Subset each epoch, Static ==> same Subset each epoch
 
     ### Dataloaders
@@ -235,7 +234,7 @@ def create_dataloaders(config: Config):
 
         weights = [pos_weight if x == 1 else 1 for x in labels]
 
-        num_samples = int(config.num_samples_ratio * len(labels))
+        num_samples = 2 * sum(labels) if config.num_samples_ratio == 'same' else int(config.num_samples_ratio * len(labels)) 
 
         if config.sampling_type == 'static':
 
@@ -288,7 +287,7 @@ def create_model(config : Config) -> nn.Module:
             dropout=config.dropout
         )
 
-    elif 'vit' in config.model:
+    elif config.model.startswith('vit'):
 
         model = ViT(
             model_name=config.model,
@@ -314,7 +313,52 @@ def create_model(config : Config) -> nn.Module:
             pretrained=True,
             dropout=config.dropout
         )
+
+    elif config.model.startswith('swin'):
+
+        model = SwinTransformer(
+            model_name=config.model,
+            num_classes=1,
+            pretrained=True,
+            dropout=config.dropout
+        )
+
+    elif config.model.startswith('convnext'):
+
+        model = ConvNext(
+            model_name=config.model,
+            num_classes=1,
+            pretrained=True,
+            dropout=config.dropout
+        )
+
+    elif config.model.startswith('eva02'):
+
+        model = Eva02(
+            model_name=config.model,
+            num_classes=1,
+            pretrained=True,
+            dropout=config.dropout
+        )
     
+    elif config.model.startswith('coat'):
+
+        model = Coat(
+            model_name=config.model,
+            num_classes=1,
+            pretrained=True,
+            dropout=config.dropout
+        )
+
+    elif config.model.startswith('next'):
+
+        model = NextViT(
+            model_name=config.model,
+            num_classes=1,
+            pretrained=True,
+            dropout=config.dropout
+        )
+
     else:
         raise ValueError(f"Model {config.model} not supported.")
     
